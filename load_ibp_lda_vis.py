@@ -16,7 +16,6 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.decomposition import LatentDirichletAllocation
 
-from nilearn.datasets import fetch_atlas_aal
 from nilearn import plotting
 from nilearn.image import index_img, concat_imgs
 from nilearn.input_data import NiftiMasker
@@ -377,7 +376,6 @@ for i_iter in np.arange(70):
 
     # n_topics = np.random.randint(2, 6)
     ROI_TAG = 'DMNsubregionsextra'
-    # ROI_TAG = 'AAL'
 
     n_feat = X_task.shape[-1]
 
@@ -573,20 +571,12 @@ for i_iter in np.arange(70):
 
     factor_weights = np.dot(lda.components_, IBP_comps)
     for i_c, comp_mat in enumerate(factor_weights):
-        if 'AAL' in ROI_TAG:
-            aal_ds = fetch_atlas_aal()
-            TAGS = aal_ds['labels']
-            out_coef = np.zeros((116, 116))
-        else:
-            out_coef = np.zeros((21, 21))
+        out_coef = np.zeros((21, 21))
         tril_inds = np.tril_indices_from(out_coef, k=-1)
         out_coef[tril_inds] = comp_mat
     
         from matplotlib import pylab as plt
-        if 'AAL' in ROI_TAG:
-            plt.figure(figsize=(14, 12))
-        else:
-            plt.figure(figsize=(10, 8))
+        plt.figure(figsize=(10, 8))
         # plt.imshow(np.zeros_like(out_coef), cmap=plt.cm.RdBu)
         masked_data = np.ma.masked_where(out_coef == 0., out_coef)
         # plt.imshow(masked_data, cmap=plt.cm.RdBu, interpolation='nearest')
@@ -603,12 +593,8 @@ for i_iter in np.arange(70):
         # heat_hdl = sns.heatmap(masked_data, xticklabels=10, yticklabels=10, cbar_kws={"shrink": .5}, cmap=my_cmap)
         # for item in heat_hdl.get_yticklabels():
         #     item.set_rotation(5)
-        if 'AAL' in ROI_TAG:
-            plt.xticks(np.arange(len(TAGS)), TAGS, fontsize=5, rotation=90)
-            plt.yticks(np.arange(len(TAGS)), TAGS, fontsize=5)
-        else:
-            plt.xticks(np.arange(len(TAGS)), TAGS, fontsize=12, rotation=90)
-            plt.yticks(np.arange(len(TAGS)), TAGS, fontsize=12)
+        plt.xticks(np.arange(len(TAGS)), TAGS, fontsize=12, rotation=90)
+        plt.yticks(np.arange(len(TAGS)), TAGS, fontsize=12)
         plt.title('Factor %i' % (i_c + 1), fontsize=19)
         plt.grid(False)
         plt.tight_layout()
@@ -943,12 +929,7 @@ for i_roi, roi in enumerate(roi_paths):
     roi_coords.append(plotting.find_xyz_cut_coords(cur_roi_img))
 
 for cur_comp in np.arange(n_props):
-    if 'AAL' in ROI_DIR:
-        aal_ds = fetch_atlas_aal()
-        TAGS = aal_ds['labels']
-        out_coef = np.zeros((116, 116))
-    else:
-        out_coef = np.zeros((21, 21))
+    out_coef = np.zeros((21, 21))
     tril_inds = np.tril_indices_from(out_coef, k=-1)
     out_coef[tril_inds] = IBP_comps[cur_comp]
 
